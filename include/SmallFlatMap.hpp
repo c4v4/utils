@@ -14,7 +14,7 @@ class SmallFlatMap {
 
     static_assert(maxSize > 0, "Needs a positive value size.");
     static_assert(std::is_integral_v<decltype(maxSize)>, "Needs a integral type for maxSize");
-    static_assert(maxSize * 5 / 4 <= (1 << 16), "Choose a smalle maxSize.");
+    static_assert(maxSize * 5 / 4 <= (1 << 16), "Choose a smaller maxSize.");
     static constexpr int next2pow(int v) {
         v--;
         v |= v >> 1;
@@ -24,7 +24,7 @@ class SmallFlatMap {
         v |= v >> 16;
         return ++v;
     }
-    static_assert(next2pow(maxSize * 5 / 4) * sizeof(KVpair) <= (1 << 16), "Maximum memory occupation of 65KB.");
+    static_assert(next2pow(maxSize * 5 / 4) * sizeof(KVpair) <= (1 << 16), "Maximum memory occupation: 65KB.");
 
 public:
     class custom_iterator {
@@ -66,9 +66,9 @@ public:
      * @return Value    The reference to the pair {key, value} if the element has
      * been found, The reference to a pair {emptyKey, <undefined>} otherwise.
      */
-    inline std::pair<Key, Value>& find(const Key k) {
-        auto index = op()(k) & realSizem1;
-        auto key = buffer[index].first;
+    inline KVpair& find(const Key k) {
+        size_t index = op()(k) & realSizem1;
+        Key key = buffer[index].first;
         while (key != k && key != emptyKey) {
             index = (index + 1) & realSizem1;
             key = buffer[index].first;
@@ -86,11 +86,10 @@ public:
      */
     inline bool insert(const Key k, const Value v) {
 
-        auto& candidate_place = find(k);
+        KVpair& candidate_place = find(k);
         if (candidate_place.first != emptyKey) return false;  // element already there
 
         candidate_place = {k, v};
-        //++sz;
         return true;
     }
 
@@ -100,36 +99,28 @@ public:
      *
      * @param k         key
      * @param v         value
-     * @return true     the insertion or the assignment took place (the element is
-     * now into the map)
-     * @return false    otherwise
      */
-    inline bool insert_or_assign(const Key k, const Value v) {
-        auto& candidate_place = find(k);
-        candidate_place = {k, v};
+    inline void insert_or_assign(const Key k, const Value v) { operator[](k) = v; }
 
-        return true;
-    }
-
-    inline auto& operator[](Key k) {
-        auto& kv = find(k);
-        kv.first = k;  // no check on sz, we need to decide if we want to check or not.
+    inline Value& operator[](Key k) {
+        KVpair& kv = find(k);
+        kv.first = k;
         return kv.second;
     }
 
     inline void clear() {
-        for (auto& p : buffer) p.first = emptyKey;
+        for (KVpair& p : buffer) p.first = emptyKey;
     }
 
     inline size_t count(Key k) { return static_cast<size_t>(find(k).first != emptyKey); }
 
-    static inline auto get_emptykey() { return emptyKey; }
-
-    static inline auto get_maxsize() { return maxSize; }
-
     inline auto begin() { return custom_iterator(buffer, buffer + realSize); };
 
     inline auto end() { return custom_iterator(buffer + realSize, buffer + realSize); };
+
+    static inline Key get_emptykey() { return emptyKey; }
+
+    static inline int get_maxsize() { return maxSize; }
 
 private:
     // Why 5/4 do you ask? Clearly a well thought value, not at all the nearest

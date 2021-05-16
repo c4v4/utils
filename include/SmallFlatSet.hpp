@@ -5,21 +5,22 @@
 
 #include "functor.hpp"
 
+static constexpr int next2pow(int v) {
+    --v;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    return ++v;
+}
+
 template <typename Value, Value emptyValue, int maxSize, class op = identity_functor<Value>>
 class SmallFlatSet {
 
     static_assert(maxSize > 0, "Needs a positive value size.");
     static_assert(std::is_integral_v<decltype(maxSize)>, "Needs a integral type for maxSize");
     static_assert(maxSize * 5 / 4 <= (1 << 16), "Choose a smalle maxSize.");
-    static constexpr int next2pow(int v) {
-        v--;
-        v |= v >> 1;
-        v |= v >> 2;
-        v |= v >> 4;
-        v |= v >> 8;
-        v |= v >> 16;
-        return ++v;
-    }
     static_assert(next2pow(maxSize * 5 / 4) * sizeof(Value) <= (1 << 16), "Maximum memory occupation of 65KB.");
 
 public:
@@ -52,12 +53,12 @@ public:
 
 public:
     SmallFlatSet() {
-        for (auto& p : buffer) p = emptyValue;
+        for (Value& p : buffer) p = emptyValue;
     };
 
     inline Value& find(const Value v) {
-        auto index = op()(v) & realSizem1;
-        auto value = buffer[index];
+        size_t index = op()(v) & realSizem1;
+        Value value = buffer[index];
         while (value != v && value != emptyValue) {
             index = (index + 1) & realSizem1;
             value = buffer[index];
@@ -67,35 +68,30 @@ public:
 
 
     inline bool insert(const Value v) {
-        auto& candidate_place = find(v);
+        Value& candidate_place = find(v);
         if (candidate_place != emptyValue) return false;  // element already there
 
         candidate_place = v;
         return true;
     }
 
-    inline bool insert_or_assign(const Value v) {
-        auto& candidate_place = find(v);
-        candidate_place = v;
+    inline void insert_or_assign(const Value v) { operator[](v); }
 
-        return true;
-    }
-
-    inline auto& operator[](Value v) {
-        auto& value = find(v);
-        value = v;  // no check on sz, we need to decide if we want to check or not.
+    inline Value& operator[](Value v) {
+        Value& value = find(v);
+        value = v;
         return value;
     }
 
     inline void clear() {
-        for (auto& p : buffer) p = emptyValue;
+        for (Value& p : buffer) p = emptyValue;
     }
 
     inline size_t count(Value v) { return static_cast<size_t>(find(v) != emptyValue); }
 
-    static inline auto get_emptykey() { return emptyValue; }
+    static inline Value get_emptyvalue() { return emptyValue; }
 
-    static inline auto get_maxsize() { return maxSize; }
+    static inline size_t get_maxsize() { return maxSize; }
 
     inline auto begin() { return custom_iterator(buffer, buffer + realSize); };
 
@@ -118,46 +114,11 @@ class VerySmallFlatSet {
     static_assert(maxSize > 0, "Needs a positive value size.");
     static_assert(std::is_integral_v<decltype(maxSize)>, "Needs a integral type for maxSize");
     static_assert(maxSize * 5 / 4 <= (1 << 16), "Choose a smalle maxSize.");
-    static constexpr int next2pow(int v) {
-        v--;
-        v |= v >> 1;
-        v |= v >> 2;
-        v |= v >> 4;
-        v |= v >> 8;
-        v |= v >> 16;
-        return ++v;
-    }
     static_assert(next2pow(maxSize * 5 / 4) * sizeof(Value) <= (1 << 16), "Maximum memory occupation of 65KB.");
 
 public:
-    class custom_iterator {
-        friend class VerySmallFlatSet<Value, emptyValue, maxSize>;
-
-    private:
-        custom_iterator(Value* _base, Value* _end) : base(_base), end(_end){};
-
-    public:
-        inline auto& operator*() { return *base; }
-
-        inline auto operator->() { return base; }
-
-        inline auto& operator++() {
-            ++base;
-            return *this;
-        }
-
-        inline auto operator!=(const custom_iterator x) { return x.base != base; }
-
-        inline auto operator==(const custom_iterator x) { return x.base == base; }
-
-    private:
-        Value* base;
-        const Value* end;
-    };
-
-public:
     VerySmallFlatSet() {
-        for (auto& p : buffer) p = emptyValue;
+        for (Value& p : buffer) p = emptyValue;
     };
 
     inline Value& find(const Value v) {
@@ -171,7 +132,7 @@ public:
 
 
     inline bool insert(const Value v) {
-        auto& candidate_place = find(v);
+        Value& candidate_place = find(v);
         if (candidate_place != emptyValue) return false;  // element already there
 
         candidate_place = v;
@@ -180,27 +141,27 @@ public:
 
     inline bool insert_or_assign(const Value v) {
         // if not there insert it, if there assign it.
-        auto& candidate_place = find(v);
+        Value& candidate_place = find(v);
         candidate_place = v;
 
         return true;
     }
 
-    inline auto& operator[](Value v) { return find(v) = v; }
+    inline Value& operator[](Value v) { return find(v) = v; }
 
     inline void clear() {
-        for (auto& p : buffer) p = emptyValue;
+        for (Value& p : buffer) p = emptyValue;
     }
 
     inline size_t count(Value v) { return static_cast<size_t>(find(v) != emptyValue); }
 
-    static inline auto get_emptykey() { return emptyValue; }
+    static inline Value get_emptyvalue() { return emptyValue; }
 
-    static inline auto get_maxsize() { return maxSize; }
+    static inline size_t get_maxsize() { return maxSize; }
 
-    inline auto begin() { return custom_iterator(buffer, buffer + realSize); };
+    inline Value* begin() { return buffer; }
 
-    inline auto end() { return custom_iterator(buffer + realSize, buffer + realSize); };
+    inline Value* end() { return buffer + realSize; }
 
 private:
     // Why 5/4 do you ask? Clearly a well thought value, not at all the nearest
