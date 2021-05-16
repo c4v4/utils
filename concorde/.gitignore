@@ -1,0 +1,9 @@
+config*
+*.a
+aclocal.m4
+
+.vscode
+*/*
+!*/*.c
+!*/*.h
+!*/Makefile
