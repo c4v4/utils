@@ -1,6 +1,6 @@
 // Customized version of Luca Accorsi original binary heap implementation
-#ifndef UTILS_INCLUDE_BINARYHEAP_HPP_
-#define UTILS_INCLUDE_BINARYHEAP_HPP_
+#ifndef UTILS_INCLUDE_BINARYHEAP_HPP
+#define UTILS_INCLUDE_BINARYHEAP_HPP
 
 #include <cassert>
 #include <vector>
@@ -29,7 +29,7 @@ class BinaryHeap {
 
     int inline min_lr(T& parent, int lindex, int rindex) {
         const int hsize = heap.size();
-        auto smallest = lindex;
+        int smallest = lindex;
         if (rindex < hsize && Cmp()(heap[rindex], heap[lindex]) < 0) { smallest = rindex; }  // !! rindex < lindex always !!
         if (smallest < hsize && Cmp()(heap[smallest], parent) < 0) { return smallest; }
 
@@ -38,7 +38,7 @@ class BinaryHeap {
 
     void heapify(int hindex) {
 
-        auto smallest = min_lr(heap[hindex], LEFT(hindex), RIGHT(hindex));
+        int smallest = min_lr(heap[hindex], LEFT(hindex), RIGHT(hindex));
         if (smallest == unheaped) { return; }
 
         auto elem = std::move(heap[hindex]);
@@ -58,7 +58,7 @@ class BinaryHeap {
 
         if (hindex == 0) { return; }
 
-        auto pindex = hindex;
+        int pindex = hindex;
         auto elem = std::move(heap[hindex]);
         while (hindex && Cmp()(elem, heap[pindex = PARENT(pindex)]) < 0) {
 
@@ -76,7 +76,7 @@ class BinaryHeap {
         const int hsize = heap.size();
         for (int n = 0; n < hsize; ++n) {
             const auto& t = heap[n];
-            if (auto idx = GetIdx()(t); idx != n) { return false; }
+            if (int idx = GetIdx()(t); idx != n) { return false; }
         }
 
         for (int n = 0; n < hsize; ++n) {

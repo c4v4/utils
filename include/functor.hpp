@@ -1,5 +1,5 @@
-#ifndef UTILS_INCLUDE_FUNCTOR_HPP_
-#define UTILS_INCLUDE_FUNCTOR_HPP_
+#ifndef UTILS_INCLUDE_FUNCTOR_HPP
+#define UTILS_INCLUDE_FUNCTOR_HPP
 
 #include <type_traits>
 

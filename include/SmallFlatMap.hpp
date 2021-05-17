@@ -1,5 +1,5 @@
-#ifndef UTILS_INCLUDE_SMALLFLATMAP_HPP_
-#define UTILS_INCLUDE_SMALLFLATMAP_HPP_
+#ifndef UTILS_INCLUDE_SMALLFLATMAP_HPP
+#define UTILS_INCLUDE_SMALLFLATMAP_HPP
 
 #include <algorithm>
 
@@ -8,7 +8,6 @@
 template <typename Key, typename Value, Key emptyKey, int maxSize, class op = identity_functor<Key>>
 class SmallFlatMap {
 
-    // using HashOp = std::function<unsigned(Key)>;
     using KVpair = std::pair<Key, Value>;
     using KVpair_ptr = KVpair*;
 

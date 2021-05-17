@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef UTILS_INCLUDE_CIRCULARVECTOR_HPP_
-#define UTILS_INCLUDE_CIRCULARVECTOR_HPP_
+#ifndef UTILS_INCLUDE_CIRCULARVECTOR_HPP
+#define UTILS_INCLUDE_CIRCULARVECTOR_HPP
 
 #include <algorithm>
 #include <cassert>

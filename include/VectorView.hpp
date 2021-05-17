@@ -1,5 +1,5 @@
-#ifndef UTILS_INCLUDE_VECTORVIEW_HPP_
-#define UTILS_INCLUDE_VECTORVIEW_HPP_
+#ifndef UTILS_INCLUDE_VECTORVIEW_HPP
+#define UTILS_INCLUDE_VECTORVIEW_HPP
 
 #include <algorithm>
 #include <vector>

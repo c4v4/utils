@@ -1,5 +1,5 @@
-#ifndef UNION_FIND_H
-#define UNION_FIND_H
+#ifndef UNION_FIND_HPP
+#define UNION_FIND_HPP
 #include <stddef.h>
 
 #include <vector>
