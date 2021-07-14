@@ -13,7 +13,7 @@
 #
 
 
-SHELL = /bin/sh
+SHELL = /usr/bin/sh
 SRCROOT = ..
 BLDROOT = ..
 CCINCDIR=$(SRCROOT)/INCLUDE
@@ -21,9 +21,9 @@ CCINCDIR=$(SRCROOT)/INCLUDE
 srcdir = .
 
 CC = gcc
-CFLAGS = -g -O3  -D_REENTRANT -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
-LDFLAGS = -g -O3 
-LIBFLAGS = -lm -lpthread  
+CFLAGS = -g -O2  -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
+LDFLAGS = -g -O2 
+LIBFLAGS = -liberty -lbfd -lm  -lpthread
 RANLIB = ranlib
 
 OBJ_SUFFIX = o

@@ -13,7 +13,7 @@
 #
 
 
-SHELL = /bin/sh
+SHELL = /usr/bin/sh
 SRCROOT = ..
 BLDROOT = ..
 CCINCDIR=$(SRCROOT)/INCLUDE
@@ -21,12 +21,11 @@ CCINCDIR=$(SRCROOT)/INCLUDE
 srcdir = .
 
 CC = gcc
-CFLAGS = -g -O3  -D_REENTRANT -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
-LDFLAGS = -g -O3 
-LIBFLAGS = -lm -lpthread 
+CFLAGS = -g -O2  -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
+LDFLAGS = -g -O2 
+LIBFLAGS = -liberty -lbfd -lm  -lpthread
 RANLIB = ranlib
-#LPSOLVER_LIB = /mnt/e/Universita/RO2/monalisa/code/concorde/libcplex.a
-LPSOLVER_LIB = ../../cplex/libcplex.a
+LPSOLVER_LIB = /home/cava/Uni/utils/concorde/cplex/libcplex.a
 
 OBJ_SUFFIX = o
 o = $(OBJ_SUFFIX)

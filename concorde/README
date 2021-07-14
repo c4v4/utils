@@ -1,3 +1,58 @@
+!! HERE !!
+
+HEY, cava here, look at https://www.leandro-coelho.com/install-and-run-concorde-with-cplex/ 
+You're welcome future me.
+
+"
+[...]
+3. Change the following concorde files before linking it to CPLEX:
+
+cd concorde
+
+– to avoid undefined reference to ’dlopen’ or ‘pthread’ or similar.
+
+In “concorde/Makefile.in” change LIBFLAGS to:
+
+            LIBFLAGS = @LIBS@ -lpthread
+In “concorde/TSP/Makefile.in” change LIBFLAGS to:
+
+            LIBFLAGS = @LIBS@ -lpthread -ldl
+4. Create simlinks from some CPLEX files to the directory where you want to compile Concorde:
+
+ln -s /path/to/cplex/include/ilcplex/*.h .
+ln -s /path/to/cplex/lib/x86-64_sles10_4.1/static_pic/libcplex.a .
+5. Run the configure:
+
+./configure --prefix=/path/to/concorde –with-cplex=/path/to/concorde
+6. Run make
+
+make
+7. Change to following concorde files after linking it to CPLEX:
+
+– To avoid error: expected ‘,’ or ‘. . .’ before ‘new’ or ‘class’
+
+In “concorde/concorde.h” use find and replace to change all *new) to *NEW) and all *class) to *CLASS)
+
+–  To avoid error: ‘CPX_PARAM_FASTMIP’ undeclared (first use in this function).
+
+In “concorde/LP/lpcplex8.c” after #undef  CC_CPLEX_DISPLAY add:
+
+            #ifndef CPX_PARAM_FASTMIP
+            #define CPX_PARAM_FASTMIP 1017
+            #endif
+8. Rename “concorde.a” to “libconcorde.a”
+
+mv concorde.a libconcorde.a
+
+[...]
+"
+
+ALSO:
+- CPXsavwrite has been removed, use CPXwriteprob (you need to add NULL as last parameter)
+- Add lpthread pretty much everywhere and stop worrying about it
+
+!! HERE !!
+
 This README file is part of the 03.12.19 release of the Concorde.
 More information about Concorde is available from the Concorde page at
 http://www.math.princeton.edu/tsp/concorde.html.

@@ -2219,7 +2219,7 @@ int CCutil_graph2dat_matrix (int ncount, int ecount, int *elist, int *elen,
         rval = 1;
         goto CLEANUP;
     }
-    
+
     for (i=0, j=0; i<ncount; i++) {
         dat->adj[i] = dat->adjspace + j;
         j += (i+1);

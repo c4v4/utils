@@ -3215,7 +3215,6 @@ int CCtsp_add_vars_to_lp (CCtsp_lp *lp, CCtsp_predge *prlist, int n)
         e[i].len = prlist[i].len;
         e[i].coefnext = -2;
         e[i].coef = 0;
-		//printf(" ... LP var. x%06d : from %6d to %6d --> cost %10d \n", i+1, e[i].ends[0], e[i].ends[1], e[i].len); // Matteo Fischetti 14-jul-2019 
     }
 
     rval = build_lp_cols (&lp->graph, &lp->cuts, lp->graph.ecount,

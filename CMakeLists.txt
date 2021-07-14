@@ -4,7 +4,7 @@ project(UTILS)
 set(CMAKE_CXX_STANDARD 17)
 
 set(WARNING_FLAGS "-Wall -Wextra -Wpedantic -Wuninitialized -Wshadow ")
-set(SANITIZERS_FLAGS "-g -Og -fno-omit-frame-pointer -fsanitize=address -fsanitize-address-use-after-scope -fsanitize=undefined")
+set(SANITIZERS_FLAGS "-g -O0 -fno-omit-frame-pointer -fsanitize=address -fsanitize-address-use-after-scope -fsanitize=undefined")
 set(OPT_FLAGS "-O3 -march=native -ffat-lto-objects -flto")
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
@@ -21,23 +21,34 @@ if (CPLEX_FOUND)
     set(SOURCE ${SOURCE} CPLEXSolver.hpp)
     include_directories(${CPLEX_INCLUDE_DIRS})
     message(${CPLEX_INCLUDE_DIRS})
-    target_link_libraries(${CPLEX_LIBRARIES} pthread dl m)
+    set(${CPLEX_LIBRARIES} ${CPLEX_LIBRARIES} pthread dl m)
     add_definitions(-DIL_STD)
 endif(CPLEX_FOUND)
 
-include_directories(include)
+include_directories(include ${CPLEX_INCLUDE_DIRS})
 
 # CONCORDE
+set(CONCORDE_LIBRARY ${CMAKE_CURRENT_SOURCE_DIR}/concorde/libconcorde.a)
+#add_custom_target(build_concorde ALL 
+#                   COMMAND ${CMAKE_MAKE_PROGRAM}
+#                   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/concorde
+#                   COMMENT "Concorde solver")
+
+add_library(libconcorde STATIC IMPORTED)
+set_property(TARGET libconcorde APPEND PROPERTY IMPORTED_CONFIGURATIONS NOCONFIG)
+set_target_properties(libconcorde PROPERTIES IMPORTED_LOCATION_NOCONFIG "${CONCORDE_LIBRARY}")
+
 set(SOURCE1  src/concorde_example.cpp)
 add_executable(concorde_example ${SOURCE1})
-target_link_libraries(concorde_example ${DEFAULT_LIBRARIES})
+target_link_libraries(concorde_example ${DEFAULT_LIBRARIES} ${CPLEX_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/concorde/libconcorde.a)
+
 
 # CPLEX TSP
 set(SOURCE2  src/cplex_tsp_example.cpp)
 add_executable(cplex_tsp_example ${SOURCE2})
-target_link_libraries(cplex_tsp_example ${DEFAULT_LIBRARIES} ${CPLEX_LIBRARIES})
+target_link_libraries(cplex_tsp_example ${DEFAULT_LIBRARIES} ${CPLEX_LIBRARIES} ${CMAKE_CURRENT_SOURCE_DIR}/concorde/libconcorde.a)
 
 # CPLEX SCP
-set(SOURCE3  src/cplex_scp_example.cpp)
-add_executable(cplex_scp_example ${SOURCE3})
-target_link_libraries(cplex_scp_example ${DEFAULT_LIBRARIES} ${CPLEX_LIBRARIES})
+#set(SOURCE3  src/cplex_scp_example.cpp)
+#add_executable(cplex_scp_example ${SOURCE3})
+#target_link_libraries(cplex_scp_example ${DEFAULT_LIBRARIES} ${CPLEX_LIBRARIES})

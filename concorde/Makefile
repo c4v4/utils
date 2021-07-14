@@ -13,7 +13,7 @@
 #
 
 
-SHELL = /bin/sh
+SHELL = /usr/bin/sh
 SRCROOT = .
 BLDROOT = .
 CCINCDIR=$(SRCROOT)/INCLUDE
@@ -22,9 +22,9 @@ BLDINCDIR=$(BLDROOT)/INCLUDE
 srcdir = .
 
 CC = gcc
-CFLAGS = -g -O3  -D_REENTRANT -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
-LDFLAGS = -g -O3 
-LIBFLAGS = -lm -lpthread -ldl
+CFLAGS = -g -O2  -I$(BLDROOT)/INCLUDE -I$(CCINCDIR)
+LDFLAGS = -g -O2 
+LIBFLAGS = -liberty -lbfd -lm  -lpthread
 RANLIB = ranlib
 
 OBJ_SUFFIX = o
@@ -55,7 +55,9 @@ INC_LIST=$(BLDINCDIR)/config.h  $(CCINCDIR)/machdefs.h $(CCINCDIR)/util.h     \
          $(CCINCDIR)/tinytsp.h  $(CCINCDIR)/tsp.h      $(CCINCDIR)/verify.h
 
 concorde.h: $(INC_LIST) Makefile
-	cat $(INC_LIST) | grep -v '#include "' > concorde.h
+	cat $(INC_LIST) | grep -v '#include "' > concorde.h 
+	sed -i 's/*new/*NEW/g' concorde.h 					
+	sed -i 's/*class/*CLASS/g' concorde.h
 
 clean:
 	-rm -f *.$o concorde.a libconcorde.a

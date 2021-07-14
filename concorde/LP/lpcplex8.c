@@ -25,7 +25,6 @@
 /*  Written by:  Applegate, Bixby, Chvatal, and Cook                        */
 /*  Date: April 17, 1997                                                    */
 /*        June 19, 1997 (bico, REB)                                         */
-/*		  July 23, 2019: LP sniffing by Matteo Fischetti            */
 /*                                                                          */
 /*  See the start of the file lp_none.c for a description of the            */
 /*  functions exported by this file.                                        */
@@ -42,41 +41,13 @@
 #include "lp.h"
 #include <cplex.h>
 
-
+#ifndef CPX_PARAM_FASTMIP
 #define CPX_PARAM_FASTMIP 1017
+#endif
 
 #undef  CC_CPLEX_DISPLAY
 
 #define CC_ONE_ENV
-
-
-#define LP_SNIFFER 0  // =0 default, =1 to print the lp file in CPXdualopt (Matteo Fischetti, 13-jul-2019_
-
-int num_sniff=0;
-
-
-int myCPXdualopt(CPXENVptr env, CPXLPptr lp)
-{
-	if ( LP_SNIFFER ) 
-	{
-		int status;
-		CPXENVptr env2 = CPXopenCPLEX(&status);
-		CPXLPptr lp2 = CPXcreateprob(env2, &status, "IP clone");
-		lp2 = CPXcloneprob(env2, lp, &status);
-		char str[10000];
-		char ctype;
-		sprintf(str,"s%d.lp", num_sniff++);
-		CPXchgprobtype(env2,lp2,CPXPROB_MILP);
-		ctype = 'B';
-		for ( int j=0; j < CPXgetnumcols(env2,lp2); j++) CPXchgctype(env2,lp2, 1, &j, &ctype);
-		CPXwriteprob(env2, lp2, str, NULL);
-		CPXfreeprob(env2, &lp2);
-		CPXcloseCPLEX(&env2);
-		printf("%s ",str);
-		//getchar();
-	}
-	return CPXdualopt(env, lp);
-}
 
 #ifdef CC_ONE_ENV
 static CPXENVptr CClp_cplex_env = (CPXENVptr) NULL;
@@ -105,8 +76,6 @@ struct CClp {
     CClp_parameters cplex_params;
 #endif
 };
-
-
 
 struct CClp_warmstart {
     int      rcount;
@@ -469,7 +438,7 @@ static int primalopt (CClp *lp)
     sprintf (probname, "prim%d.sav", probcnt);
     probcnt++;
     printf ("Writing %s\n", probname);
-    CPXsavwrite (lp->cplex_env, lp->cplex_lp, probname);
+    CPXwriteprob (lp->cplex_env, lp->cplex_lp, probname,NULL);
 #endif
 
     rval = CPXprimopt (lp->cplex_env, lp->cplex_lp);
@@ -534,10 +503,10 @@ static int dualopt (CClp *lp)
     sprintf (probname, "dual%d.sav", probcnt);
     probcnt++;
     printf ("Writing %s\n", probname);
-    CPXsavwrite (lp->cplex_env, lp->cplex_lp, probname);
+    CPXwriteprob  (lp->cplex_env, lp->cplex_lp, probname,NULL);
 #endif
 
-    rval = myCPXdualopt (lp->cplex_env, lp->cplex_lp);
+    rval = CPXdualopt (lp->cplex_env, lp->cplex_lp);
     if (rval) {
         if (rval == CPX_STAT_INForUNBD) {
             int old, oldagg;
@@ -559,9 +528,9 @@ static int dualopt (CClp *lp)
                 fprintf (stderr, "CPXsetintparam CPX_PARAM_AGGIND failed\n");
                 return 1;
             }
-            rval = myCPXdualopt (lp->cplex_env, lp->cplex_lp);
+            rval = CPXdualopt (lp->cplex_env, lp->cplex_lp);
             if (rval) {
-                fprintf (stderr, "myCPXdualopt failed, return code %d\n", rval);
+                fprintf (stderr, "CPXdualopt failed, return code %d\n", rval);
                 return 1;
             }
             if (CPXsetintparam (lp->cplex_env, CPX_PARAM_PREIND, old)) {
@@ -573,7 +542,7 @@ static int dualopt (CClp *lp)
                 return 1;
             }
         } else {
-            fprintf (stderr, "myCPXdualopt failed, return code %d\n", rval);
+            fprintf (stderr, "CPXdualopt failed, return code %d\n", rval);
             return 1;
         }
     }
@@ -607,18 +576,18 @@ static int baropt (CClp *lp)
     sprintf (probname, "barrier%d.sav", probcnt);
     probcnt++;
     printf ("Writing %s\n", probname);
-    CPXsavwrite (lp->cplex_env, lp->cplex_lp, probname);
+    CPXwriteprob  (lp->cplex_env, lp->cplex_lp, probname,NULL);
 #endif
 
     rval = CPXbaropt (lp->cplex_env, lp->cplex_lp);
     if (rval) {
-        printf ("CPXbaropt failed, return code %d, calling myCPXdualopt\n",
+        printf ("CPXbaropt failed, return code %d, calling CPXdualopt\n",
                 rval);
         return dualopt (lp);
     }
     solstat = CPXgetstat (lp->cplex_env, lp->cplex_lp);
     if (solstat != CPX_STAT_OPTIMAL) {
-        printf ("CPXbaropt returned non-optimal solution, calling myCPXdualopt\n");
+        printf ("CPXbaropt returned non-optimal solution, calling CPXdualopt\n");
         return dualopt (lp);
     }
     return 0;
@@ -727,7 +696,7 @@ int CClp_limited_dualopt (CClp *lp, int iterationlim, int *status,
         }
     }
 
-    rval = myCPXdualopt (lp->cplex_env, lp->cplex_lp);
+    rval = CPXdualopt (lp->cplex_env, lp->cplex_lp);
     if (rval) {
         if (rval == CPX_STAT_INForUNBD) {
             printf ("Cplex presolve failed, force simplex\n");
@@ -741,13 +710,13 @@ int CClp_limited_dualopt (CClp *lp, int iterationlim, int *status,
                 fprintf (stderr, "CPXsetintparam CPX_PARAM_AGGIND failed\n");
                 goto CLEANUP;
             }
-            rval = myCPXdualopt (lp->cplex_env, lp->cplex_lp);
+            rval = CPXdualopt (lp->cplex_env, lp->cplex_lp);
             if (rval) {
-                fprintf (stderr, "myCPXdualopt failed, return code %d\n", rval);
+                fprintf (stderr, "CPXdualopt failed, return code %d\n", rval);
                 goto CLEANUP;
             }
         } else {
-            fprintf (stderr, "myCPXdualopt failed, return code %d\n", rval);
+            fprintf (stderr, "CPXdualopt failed, return code %d\n", rval);
             goto CLEANUP;
         }
     }
@@ -769,9 +738,9 @@ int CClp_limited_dualopt (CClp *lp, int iterationlim, int *status,
            limit infinite, but that approach seems contrary to the
            intent of this function.  Hence, the repeat test for
            CPX_IT_LIM_INFEAS below -- REB, 1 July 97 */
-        rval = myCPXdualopt (lp->cplex_env, lp->cplex_lp);
+        rval = CPXdualopt (lp->cplex_env, lp->cplex_lp);
         if (rval) {
-            fprintf (stderr, "myCPXdualopt failed, return code %d\n", rval);
+            fprintf (stderr, "CPXdualopt failed, return code %d\n", rval);
             goto CLEANUP;
         }
         solstat = CPXgetstat (lp->cplex_env, lp->cplex_lp);
@@ -784,7 +753,7 @@ int CClp_limited_dualopt (CClp *lp, int iterationlim, int *status,
     }
 
     if (solstat == CPX_STAT_INFEASIBLE) {
-        printf ("Infeasible in myCPXdualopt\n"); fflush (stdout);
+        printf ("Infeasible in CPXdualopt\n"); fflush (stdout);
         if (status) *status = CClp_INFEASIBLE;
     } else if (solstat == CPX_STAT_ABORT_IT_LIM &&
                !dfeasind                          ) {
@@ -901,7 +870,7 @@ int CClp_delete_row (CClp *lp, int i)
 
     locali[0] = i;
     if (CPXpivotin (lp->cplex_env, lp->cplex_lp, locali, 1)) {
-        //fprintf (stderr, "CPXpivotin failed, continuing anyway\n");
+        fprintf (stderr, "CPXpivotin failed, continuing anyway\n");
     }
     rval = CPXdelrows (lp->cplex_env, lp->cplex_lp, i, i);
     if (rval) fprintf (stderr, "CPXdelrows failed\n");
@@ -947,7 +916,7 @@ int CClp_delete_set_of_rows (CClp *lp, int *delstat)
     }
 
     if (CPXpivotin (lp->cplex_env, lp->cplex_lp, dellist, delcnt)) {
-        //fprintf (stderr, "CPXpivotin failed, continuing anyway\n");
+        fprintf (stderr, "CPXpivotin failed, continuing anyway\n");
     }
     CC_FREE (dellist, int);
     
@@ -977,8 +946,8 @@ int CClp_delete_column (CClp *lp, int i)
         fprintf (stderr, "CPXchgbds failed, continuing anyway\n");
     }
 
-    if (myCPXdualopt (lp->cplex_env, lp->cplex_lp)) {
-        fprintf (stderr, "myCPXdualopt failed, continuing anyway\n");
+    if (CPXdualopt (lp->cplex_env, lp->cplex_lp)) {
+        fprintf (stderr, "CPXdualopt failed, continuing anyway\n");
     }
 
     if (CPXpivotout (lp->cplex_env, lp->cplex_lp, locali, 1)) {
@@ -1045,8 +1014,8 @@ int CClp_delete_set_of_columns (CClp *lp, int *delstat)
         fprintf (stderr, "CPXchgbds failed, stumbling on anyway\n");
     }
     
-    if (myCPXdualopt (lp->cplex_env, lp->cplex_lp)) {
-        fprintf (stderr, "myCPXdualopt failed, continuing anyway\n");
+    if (CPXdualopt (lp->cplex_env, lp->cplex_lp)) {
+        fprintf (stderr, "CPXdualopt failed, continuing anyway\n");
     }
 
     if (CPXpivotout (lp->cplex_env, lp->cplex_lp, dellist, delcnt)) {
@@ -1617,13 +1586,13 @@ int CClp_dump_lp (CClp *lp, const char *fname)
     int rval = 0;
     char nambuf[32];
 
-    /* We copy the name since CPXsavwrite doesn't declare fname as const */
+    /* We copy the name since CPXwriteprob  doesn't declare fname as const */
     strncpy (nambuf, fname, sizeof (nambuf));
     nambuf[sizeof(nambuf)-1] = '\0';
 
-    rval = CPXsavwrite (lp->cplex_env, lp->cplex_lp, nambuf);
+    rval = CPXwriteprob  (lp->cplex_env, lp->cplex_lp, nambuf,NULL);
     if (rval) {
-        fprintf (stderr, "CPXsavwrite failed\n");
+        fprintf (stderr, "CPXwriteprob  failed\n",NULL);
     }
     return rval;
 }
@@ -1639,7 +1608,7 @@ int CClp_getgoodlist (CClp *lp, int *goodlist, int *goodlen_p,
     int  *cstat = (int *) NULL;
     double *x = (double *) NULL;
 
-    /* Call myCPXdualopt and verify optimality */
+    /* Call CPXdualopt and verify optimality */
 
 #ifdef CC_ONE_ENV
     if (set_parameters (lp->cplex_env, &lp->cplex_params)) {
@@ -1647,9 +1616,9 @@ int CClp_getgoodlist (CClp *lp, int *goodlist, int *goodlen_p,
     }
 #endif
 
-    rval = myCPXdualopt (lp->cplex_env, lp->cplex_lp);
+    rval = CPXdualopt (lp->cplex_env, lp->cplex_lp);
     if (rval) {
-        fprintf (stderr, "myCPXdualopt failed, return code %d\n", rval);
+        fprintf (stderr, "CPXdualopt failed, return code %d\n", rval);
         rval = 1; goto CLEANUP;
     }
 

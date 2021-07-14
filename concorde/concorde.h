@@ -22,7 +22,7 @@
 /* #undef CC_PROTO_GETRUSAGE */
 
 /* Define if you want to use posix threads */
-#define CC_POSIXTHREADS 1
+/* #undef CC_POSIXTHREADS */
 
 /* Define if <signal.h> needs to be included before <pthreads.h> */
 /* #undef CC_SIGNAL_BEFORE_PTHREAD */
@@ -307,9 +307,9 @@ extern pid_t
 #define NULL (0)
 #endif
 
-//#ifndef INT_MAX
-//#define INT_MAX ((int) (~(((unsigned) 1) << ((8*sizeof(int))-1))))
-//#endif
+#ifndef INT_MAX
+#define INT_MAX ((int) (~(((unsigned) 1) << ((8*sizeof(int))-1))))
+#endif
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -1716,8 +1716,8 @@ typedef struct CC_SRKcallback {
 
 
 void
-    CCcut_SRK_identify_paths (CC_SRKgraph *G, int *newcount, int onecnt_okay),
-    CCcut_SRK_identify_paths_to_edges (CC_SRKgraph *G, int *newcount,
+    CCcut_SRK_identify_paths (CC_SRKgraph *G, int *NEWcount, int onecnt_okay),
+    CCcut_SRK_identify_paths_to_edges (CC_SRKgraph *G, int *NEWcount,
         int onecnt_okay),
     CCcut_SRK_identify_ones (CC_SRKgraph *G, int *count, double epsilon),
     CCcut_SRK_identify_one_triangles (CC_SRKgraph *G, int *count,
@@ -2956,7 +2956,7 @@ int
     CCtsp_clique_to_array (CCtsp_lpclique *c, int **ar, int *count),
     CCtsp_clique_delta (CCtsp_lpgraph *g, double *x, CCtsp_lpclique *c,
         double *delta),
-    CCtsp_copy_lpcut_in (CCtsp_lpcut_in *c, CCtsp_lpcut_in  *mynew),
+    CCtsp_copy_lpcut_in (CCtsp_lpcut_in *c, CCtsp_lpcut_in *NEW),
     CCtsp_segment_to_subtour (CCtsp_lpcut_in **cut, int a, int b, int ncount),
     CCtsp_array_to_subtour (CCtsp_lpcut_in **cut, int *ar, int acount,
         int ncount),
@@ -2969,9 +2969,9 @@ int
     CCtsp_delete_nodes_from_lpclique (CCtsp_lpclique *cin,
          CCtsp_lpclique *cout, int delcount, int *del),
     CCtsp_lpcut_to_lpcut_in (CCtsp_lpcuts *cuts, CCtsp_lpcut *c,
-        CCtsp_lpcut_in  *mynew),
-    CCtsp_copy_lpclique (CCtsp_lpclique *c, CCtsp_lpclique  *mynew),
-    CCtsp_copy_lpdomino (CCtsp_lpdomino *c, CCtsp_lpdomino  *mynew),
+        CCtsp_lpcut_in *NEW),
+    CCtsp_copy_lpclique (CCtsp_lpclique *c, CCtsp_lpclique *NEW),
+    CCtsp_copy_lpdomino (CCtsp_lpdomino *c, CCtsp_lpdomino *NEW),
     CCtsp_create_lpcliques (CCtsp_lpcut_in *c, int cliquecount),
     CCtsp_max_node (CCtsp_lpcut_in *c),
     CCtsp_build_dp_cut (CCtsp_lpcut_in **cut, int ndomino, int *Acount,
@@ -3174,9 +3174,9 @@ int
     CCtsp_price_cuts_threaded (CCtsp_lpcuts *pool, int ncount, int ecount,
         int *elist, double *x, double *cutval, int numthreads),
     CCtsp_register_cliques (CCtsp_lpcuts *cuts, CCtsp_lpcut_in *c,
-        CCtsp_lpcut  *mynew),
+        CCtsp_lpcut *NEW),
     CCtsp_register_dominos (CCtsp_lpcuts *cuts, CCtsp_lpcut_in *c,
-        CCtsp_lpcut  *mynew),
+        CCtsp_lpcut *NEW),
     CCtsp_add_cut_to_cutlist (CCtsp_lpcuts *cuts, CCtsp_lpcut *c);
 
 void
@@ -3452,7 +3452,7 @@ int
 
 
 int
-    CCtsp_copy_skeleton (CCtsp_skeleton *old, CCtsp_skeleton  *mynew),
+    CCtsp_copy_skeleton (CCtsp_skeleton *old, CCtsp_skeleton *NEW),
     CCtsp_construct_skeleton (CCtsp_lpcut_in *c, int nodecount),
     CCtsp_read_skeleton (CC_SFILE *f, CCtsp_skeleton *skel, int ncount),
     CCtsp_write_skeleton (CC_SFILE *f, CCtsp_skeleton *skel, int ncount);
@@ -3473,9 +3473,9 @@ void
 
 int
     CCtsp_teething (CCtsp_lpgraph *g, double *x, CCtsp_lpcut_in *cut,
-        CCtsp_lpcut_in **newcut),
+        CCtsp_lpcut_in **NEWcut),
     CCtsp_teething_list (CCtsp_lpgraph *g, double *x, CCtsp_lpclique *handle,
-        int nbig, CCtsp_lpclique **bigteeth, CCtsp_lpcut_in **newcut);
+        int nbig, CCtsp_lpclique **bigteeth, CCtsp_lpcut_in **NEWcut);
 
 
 
@@ -5138,7 +5138,7 @@ int
     CCtsp_clique_to_array (CCtsp_lpclique *c, int **ar, int *count),
     CCtsp_clique_delta (CCtsp_lpgraph *g, double *x, CCtsp_lpclique *c,
         double *delta),
-    CCtsp_copy_lpcut_in (CCtsp_lpcut_in *c, CCtsp_lpcut_in  *mynew),
+    CCtsp_copy_lpcut_in (CCtsp_lpcut_in *c, CCtsp_lpcut_in *NEW),
     CCtsp_segment_to_subtour (CCtsp_lpcut_in **cut, int a, int b, int ncount),
     CCtsp_array_to_subtour (CCtsp_lpcut_in **cut, int *ar, int acount,
         int ncount),
@@ -5151,9 +5151,9 @@ int
     CCtsp_delete_nodes_from_lpclique (CCtsp_lpclique *cin,
          CCtsp_lpclique *cout, int delcount, int *del),
     CCtsp_lpcut_to_lpcut_in (CCtsp_lpcuts *cuts, CCtsp_lpcut *c,
-        CCtsp_lpcut_in  *mynew),
-    CCtsp_copy_lpclique (CCtsp_lpclique *c, CCtsp_lpclique  *mynew),
-    CCtsp_copy_lpdomino (CCtsp_lpdomino *c, CCtsp_lpdomino  *mynew),
+        CCtsp_lpcut_in *NEW),
+    CCtsp_copy_lpclique (CCtsp_lpclique *c, CCtsp_lpclique *NEW),
+    CCtsp_copy_lpdomino (CCtsp_lpdomino *c, CCtsp_lpdomino *NEW),
     CCtsp_create_lpcliques (CCtsp_lpcut_in *c, int cliquecount),
     CCtsp_max_node (CCtsp_lpcut_in *c),
     CCtsp_build_dp_cut (CCtsp_lpcut_in **cut, int ndomino, int *Acount,
@@ -5356,9 +5356,9 @@ int
     CCtsp_price_cuts_threaded (CCtsp_lpcuts *pool, int ncount, int ecount,
         int *elist, double *x, double *cutval, int numthreads),
     CCtsp_register_cliques (CCtsp_lpcuts *cuts, CCtsp_lpcut_in *c,
-        CCtsp_lpcut  *mynew),
+        CCtsp_lpcut *NEW),
     CCtsp_register_dominos (CCtsp_lpcuts *cuts, CCtsp_lpcut_in *c,
-        CCtsp_lpcut  *mynew),
+        CCtsp_lpcut *NEW),
     CCtsp_add_cut_to_cutlist (CCtsp_lpcuts *cuts, CCtsp_lpcut *c);
 
 void
@@ -5634,7 +5634,7 @@ int
 
 
 int
-    CCtsp_copy_skeleton (CCtsp_skeleton *old, CCtsp_skeleton  *mynew),
+    CCtsp_copy_skeleton (CCtsp_skeleton *old, CCtsp_skeleton *NEW),
     CCtsp_construct_skeleton (CCtsp_lpcut_in *c, int nodecount),
     CCtsp_read_skeleton (CC_SFILE *f, CCtsp_skeleton *skel, int ncount),
     CCtsp_write_skeleton (CC_SFILE *f, CCtsp_skeleton *skel, int ncount);
@@ -5655,9 +5655,9 @@ void
 
 int
     CCtsp_teething (CCtsp_lpgraph *g, double *x, CCtsp_lpcut_in *cut,
-        CCtsp_lpcut_in **newcut),
+        CCtsp_lpcut_in **NEWcut),
     CCtsp_teething_list (CCtsp_lpgraph *g, double *x, CCtsp_lpclique *handle,
-        int nbig, CCtsp_lpclique **bigteeth, CCtsp_lpcut_in **newcut);
+        int nbig, CCtsp_lpclique **bigteeth, CCtsp_lpcut_in **NEWcut);
 
 
 
@@ -5844,11 +5844,11 @@ typedef struct CCverify_cutclass {
 int
     CCverify_cut (CCtsp_lpcut_in *cut, int check_types, int *type),
     CCverify_classify (CCtsp_lpcut_in *cut, int check_types,
-        CCverify_cutclass *myclass);
+        CCverify_cutclass *CLASS);
 
 void
-    CCverify_initcutclass (CCverify_cutclass *myclass),
-    CCverify_freecutclass (CCverify_cutclass *myclass);
+    CCverify_initcutclass (CCverify_cutclass *CLASS),
+    CCverify_freecutclass (CCverify_cutclass *CLASS);
 
 
 #endif  /* __VERIFY_H */

@@ -131,7 +131,7 @@ int CCtsp_solve_dat (int ncount, CCdatagroup *indat, int *in_tour,
         int *foundtour, char *name, double *timebound, int *hit_timebound,
         int silent, CCrandstate *rstate)
 {
-    int i, norm, newtour=0, rval = 0;
+    int i, norm, newtour, rval = 0;
     CCdatagroup dat;
     CCtsp_cutselect sel;
     int *itour   = (int *) NULL;
@@ -177,7 +177,7 @@ int CCtsp_solve_dat (int ncount, CCdatagroup *indat, int *in_tour,
         mytour = itour;
 
         if (!in_val) {
-            rval = find_good_tour (ncount, &dat, mytour, &val, 1, rstate) ; //Default: (ncount, &dat, mytour, &val, 1, rstate) 
+            rval = find_good_tour (ncount, &dat, mytour, &val, 1, rstate);
         } else {
             printf ("Initial bnd %f given - use short tour run\n", *in_val);
             fflush (stdout);
@@ -370,7 +370,7 @@ static int tsp_solve_lp (CCtsp_lp *lp, CCtsp_cutselect *sel, int *out_tour,
         goto CLEANUP;
     }
 
-    rval = CCtsp_cutting_loop (lp, sel, 1, silent, rstate);   
+    rval = CCtsp_cutting_loop (lp, sel, 1, silent, rstate);
     if (rval == 2) {
         int is_infeasible;
 
@@ -413,7 +413,7 @@ static int tsp_solve_lp (CCtsp_lp *lp, CCtsp_cutselect *sel, int *out_tour,
                 }
             }
         }
-    } 
+    }
 
     if (ncount >= 100000) {
         fprintf (stderr, "Not running branching on problems of this size\n");
@@ -461,7 +461,6 @@ static int tsp_solve_lp (CCtsp_lp *lp, CCtsp_cutselect *sel, int *out_tour,
         int bbcount              = 0;
         int usebranchcliques     = 1;
         int tentative_branch_num = 0;
-        
         unsigned short hostport  = (unsigned short) 0;
         double branchzeit        = 0.0;
         double upbound           = lp->upperbound;
@@ -477,13 +476,13 @@ static int tsp_solve_lp (CCtsp_lp *lp, CCtsp_cutselect *sel, int *out_tour,
         rval = CCtsp_bfs_brancher (lp->probloc, lp->id, lp->lowerbound, sel,
                 sel, &upbound, &bbcount, usebranchcliques,  lp->dat,
                 lp->perm, lp->pool, ncount, tour, hostport, &branchzeit,
-                saveproof, tentative_branch_num, 1, mytbound, hit_timebound,
+                saveproof, tentative_branch_num, 0, mytbound, hit_timebound,
                 silent, rstate);
         if (rval) {
             fprintf (stderr, "CCtsp_bfs_brancher failed\n"); goto CLEANUP;
         }
 
-            if (upbound < lp->upperbound && out_tour) { 
+        if (upbound < lp->upperbound && out_tour) {
             *foundtour = 1;
             for (i = 0; i < ncount; i++) {
                 out_tour[i] = tour[i];
@@ -522,7 +521,7 @@ static int find_good_tour (int ncount, CCdatagroup *dat, int *tour,
     if (trials == -1) {
         kicks = (ncount > 400 ? 100 : ncount/4);
     } else {
-        kicks = (ncount > 1000 ? 500 : ncount/2); //Default: (ncount > 1000 ? 500 : ncount/2)
+        kicks = (ncount > 1000 ? 500 : ncount/2);
     }
 
     printf ("Finding a good tour for compression ...\n"); fflush (stdout);
@@ -568,8 +567,8 @@ static int find_good_tour (int ncount, CCdatagroup *dat, int *tour,
     CC_FREE (tlist, int);
 
     rval = CClinkern_tour (ncount, dat, ecount, elist, ncount, kicks,
-                    cyc, bestcyc, &bestval, 1, 0.0, 0.0, (char *) NULL,
-                    CC_LK_GEOMETRIC_KICK, rstate); //Default: (..bestcyc, &bestval, 0, 0.0, 0.0, (ch..)
+                    cyc, bestcyc, &bestval, 0, 0.0, 0.0, (char *) NULL,
+                    CC_LK_GEOMETRIC_KICK, rstate);
     if (rval) {
         fprintf (stderr, "CClinkern_tour failed\n"); goto CLEANUP;
     }
