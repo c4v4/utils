@@ -34,3 +34,16 @@
 build
 *.o
 cplex
+concorde/CUT/mincut
+concorde/EDGEGEN/edgegen
+concorde/FMATCH/fmatch
+concorde/LINKERN/linkern
+concorde/LOCALCUT/localcut
+concorde/TOOLS/edg2len
+concorde/TOOLS/edgunion
+concorde/TOOLS/fconvert
+concorde/TOOLS/prob2tsp
+concorde/TOOLS/showres
+concorde/TOOLS/tourchk
+concorde/TOOLS/tourlen
+concorde/TSP/concorde
