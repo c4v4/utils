@@ -4,20 +4,20 @@
 #include <iterator>
 
 /**
- * @brief Iterator class for raw pointers
+ * @brief Vrapper iterator class for everithing that might work as iterator and need to be class
  *
  * @tparam T type poited by the pointer
  */
-template <class T>
+template <class ptrT>
 class PtrIteratorWrap {
 public:
-    using iterator_category = typename std::iterator_traits<T*>::iterator_category;
-    using difference_type = typename std::iterator_traits<T*>::difference_type;
-    using value_type = typename std::iterator_traits<T*>::value_type;
-    using pointer = typename std::iterator_traits<T*>::pointer;
-    using reference = typename std::iterator_traits<T*>::reference;
+    typedef typename std::iterator_traits<ptrT>::iterator_category iterator_category;
+    typedef typename std::iterator_traits<ptrT>::difference_type difference_type;
+    typedef typename std::iterator_traits<ptrT>::value_type value_type;
+    typedef typename std::iterator_traits<ptrT>::pointer pointer;
+    typedef typename std::iterator_traits<ptrT>::reference reference;
 
-    PtrIteratorWrap(T* _current) : current(_current){};
+    PtrIteratorWrap(ptrT _current) : current(_current){};
 
     inline PtrIteratorWrap operator++() noexcept { return ++current, *this; }
     inline PtrIteratorWrap operator++(int) noexcept { return PtrIteratorWrap(current++); }

@@ -8,7 +8,7 @@
 #include "functors.hpp"
 
 /**
- * @brief Apply a function to a random access range online, without modifying
+ * @brief Applies a function to a random access range online, without modifying
  * the underlying values.
  *
  * @tparam IterT
@@ -16,27 +16,13 @@
  */
 template <typename IterT, template <typename T> class OpTmpl = identity_functor>
 class ContainerJitMap {
-    using T = typename std::iterator_traits<IterT>::value_type;
-    using UnaryOp = OpTmpl<T>;
+    typedef typename std::iterator_traits<IterT>::value_type T;
+    typedef OpTmpl<T> UnaryOp;
 
-    template <typename Iter>
-    class custom_const_iterator : public Iter {
-
-    public:
-        using iterator_category = typename std::iterator_traits<Iter>::iterator_category;
-        using difference_type = typename std::iterator_traits<Iter>::difference_type;
-        using value_type = typename std::iterator_traits<Iter>::value_type;
-        using pointer = typename std::iterator_traits<Iter>::pointer;
-        using reference = typename std::iterator_traits<Iter>::reference;
-
-        custom_const_iterator(Iter it) : Iter(it){};
-        inline auto operator*() { return OpTmpl<value_type>()(Iter::operator*()); }
-    };
-
-    template <typename T>
-    class custom_const_iterator<T*> : public custom_const_iterator<PtrIteratorWrap<T>> {
-    public:
-        custom_const_iterator(T* ptr) : custom_const_iterator<PtrIteratorWrap<T>>(PtrIteratorWrap(ptr)) { }
+    template <typename Iter>  // template specialization is not needed since only used methods are instantiated
+    struct custom_const_iterator : public PtrIteratorWrap<Iter> {
+        custom_const_iterator(Iter it) : PtrIteratorWrap<Iter>(it){};
+        inline auto operator*() { return UnaryOp()(PtrIteratorWrap<Iter>::operator*()); }
     };
 
 public:
