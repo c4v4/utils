@@ -1,6 +1,6 @@
 // Original code of Luca Accorsi
-#ifndef UTILS_INCLUDE_PARSING_HPP
-#define UTILS_INCLUDE_PARSING_HPP
+#ifndef CAV_PARSING_HPP
+#define CAV_PARSING_HPP
 
 #include <algorithm>
 #include <cassert>

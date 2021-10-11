@@ -1,32 +1,26 @@
- 
-#ifndef _HUAWEI_FUNCTOR_HPP
-#define _HUAWEI_FUNCTOR_HPP
+#ifndef CAV_FUNCTORS_HPP
+#define CAV_FUNCTORS_HPP
 
 #include <type_traits>
 
-template <typename T>
-struct identity_functor {
-    auto operator()(T x) { return x; }
-};
+namespace cav {
+    template <typename T>
+    struct identity_ftor {
+        constexpr T&& operator()(T&& t) const noexcept { return std::forward<T>(t); }
+    };
 
-template <typename T>
-struct twin_functor {
-    static_assert(std::is_integral_v<T>);
-    auto operator()(T x) { return x ^ 1; }
-};
+    template <typename Struct, typename fieldType, fieldType Struct::*field>
+    struct base_get_field_ref {
+        auto& operator()(Struct& t) const { return t.*field; }
+    };
 
-template <typename T>
-struct base_functor {
-    static_assert(std::is_integral_v<T>);
-    auto operator()(T x) { return x & (~1); }
-};
+    template <typename Struct, auto field>
+    struct get_field_type {
+        typedef typename std::decay<decltype(std::declval<Struct>().*field)>::type type;
+    };
 
-template <typename T, typename fieldType, fieldType T::*field>
-struct base_access_field_functor {
-    auto& operator()(T& t) { return t.*field; }
-};
+    template <typename Struct, auto field>
+    struct get_field_ref : base_get_field_ref<Struct, typename get_field_type<Struct, field>::type, field> { };
 
-template <typename T, auto field>
-struct access_field_functor : base_access_field_functor<T, typename std::decay<decltype(std::declval<T>().*field)>::type, field> { };
-
-#endif  // COBRA_INCLUDE_COBRA_FUNCTOR_HPP_
+}  // namespace cav
+#endif
